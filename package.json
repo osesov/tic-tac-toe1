@@ -1,0 +1,33 @@
+{
+  "name": "tf.tic-tac-toe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "game.js",
+  "scripts": {
+    "browser": "tsc -w -p tsconfig.browser.json",
+    "nodejs": "tsc -w -p tsconfig.nodejs.json",
+    "http": "cd index && http-server-with-headers",
+    "train": "npx tsx nodejs/train.ts",
+    "rollup-browser": "rollup browser.rollup.config.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tensorflow/tfjs": "^4.2.0",
+    "@tensorflow/tfjs-backend-wasm": "^4.2.0",
+    "@tensorflow/tfjs-vis": "^1.5.1"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "@tensorflow/tfjs-node": "^4.2.0",
+    "@types/jquery": "^3.5.16",
+    "@types/node": "^18.15.0",
+    "rollup": "^3.19.1",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-serve": "^2.0.2",
+    "tsx": "^3.12.5"
+  }
+}
