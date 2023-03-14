@@ -1,4 +1,5 @@
 import * as tf from "@tensorflow/tfjs-node"
+import * as crypto from "crypto";
 import * as fs from "fs";
 import { Board, Player } from "../lib/game";
 import { Model } from "../lib/model"
@@ -23,6 +24,9 @@ async function train() {
     let x_win = 0;
     let o_win = 0;
     let games = 0;
+    const uuid = crypto.randomUUID();
+    const backupFile = `${uuid}-backup.model.json`;
+    const currentFile = `${uuid}.model.json`;
 
     while (true) {
         board.start();
@@ -53,12 +57,10 @@ async function train() {
         const sprob = 1 - (o_win / games);
         const lprob = o_win / games;
 
-        console.log(`${games}: win=${wprob.toFixed(3)} loose=${lprob.toFixed(3)}  non-loose=${sprob.toFixed(3)}`);
+        console.log(`${uuid} ${games}: win=${wprob.toFixed(3)} loose=${lprob.toFixed(3)}  non-loose=${sprob.toFixed(3)}`);
         await model.train(board);
 
         const data = await model.asJson();
-        const backupFile = 'data.old.json';
-        const currentFile = 'data.json';
 
         if (fs.existsSync(backupFile))
             fs.unlinkSync(backupFile);
