@@ -1,5 +1,5 @@
 import * as tf from "@tensorflow/tfjs-node"
-import { writeFileSync } from "fs";
+import * as fs from "fs";
 import { Board, Player } from "../lib/game";
 import { Model } from "../lib/model"
 
@@ -55,6 +55,18 @@ async function train() {
 
         console.log(`${games}: win=${wprob.toFixed(3)} loose=${lprob.toFixed(3)}  non-loose=${sprob.toFixed(3)}`);
         await model.train(board);
+
+        const data = await model.asJson();
+        const backupFile = 'data.old.json';
+        const currentFile = 'data.json';
+
+        if (fs.existsSync(backupFile))
+            fs.unlinkSync(backupFile);
+
+        if (fs.existsSync(currentFile))
+            fs.renameSync(currentFile, backupFile);
+
+        fs.writeFileSync(currentFile, data);
     }
 
 }
