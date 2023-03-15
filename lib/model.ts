@@ -11,10 +11,10 @@ export class Model {
     private createNetwork(): tf.Sequential {
         const model: tf.Sequential = tf.sequential();
 
-        model.add(tf.layers.inputLayer({ inputShape: [1] }))
-        model.add(tf.layers.dense({ units: 10, activation: "relu", name: 'hidden1' }));
+        model.add(tf.layers.inputLayer({ inputShape: [9] }))
+        model.add(tf.layers.dense({ units: 10, activation: "relu", name: 'hidden1', useBias: true }));
         model.add(tf.layers.dense({ units: 25, activation: 'relu', name: 'hidden2' }));
-        model.add(tf.layers.dense({ units: 1, activation: 'linear', /*useBias: true, */ name: 'output' }));
+        model.add(tf.layers.dense({ units: 9, activation: 'linear', /*useBias: true, */ name: 'output' }));
 
         model.summary();
         model.compile({
@@ -60,8 +60,8 @@ export class Model {
         return new Model(network as tf.Sequential);
     }
 
-    public stateAsTensor(state: State | Uint8Array | Float32Array | Int32Array): tf.Tensor1D {
-        return tf.tensor1d(state/*, [9, 1]*/);
+    public stateAsTensor(state: State | Uint8Array | Float32Array | Int32Array): tf.Tensor2D {
+        return tf.tensor2d(state, [1, 9]);
     }
 
     public predict(board: Board): CellIndex[] {
@@ -86,23 +86,34 @@ export class Model {
         return maxData.index;
     }
 
+    private async doPredict(state: State): Promise<{input: tf.Tensor, output: Float32Array | Int32Array | Uint8Array}>
+    {
+        const input = this.stateAsTensor(state);
+        const outputTensor = this.network.predict(input);
+        if (Array.isArray(outputTensor)) {
+            throw new Error("Tesor expected");
+        }
+
+        return {input, output: await outputTensor.data()};
+    }
+
     public async train(board: Board): Promise<void> {
         if (!board.complete)
             throw new Error("Incomplete game");
 
         const winner = board.winner;
         const reward = winner === Player.X ? +1.0
-        : winner === Player.O ? -1.0
-        : 0.5
+            : winner === Player.O ? -1.0
+            : 0.5
+
+        let first = false;
 
         for (const elem of board.stateHistory) {
-            const input = this.stateAsTensor(elem.curState);
-            const outputTensor = this.network.predict(input);
-            if (Array.isArray(outputTensor)) {
-                break;
+            const {input, output: outputArray} =  await this.doPredict(elem.curState);
+            if (first) {
+                const str = Array.from(outputArray).map( e => e.toFixed(3) );
+                console.log(`${elem.newState}: ${str}`);
             }
-
-            const outputArray = outputTensor.dataSync();
 
             outputArray[elem.move] += reward;
             const output = this.stateAsTensor(outputArray);
@@ -112,7 +123,20 @@ export class Model {
             const min = output.min();
             if (max.notEqual(min))
                 output.sub(min).div(max.sub(min));
-            await this.network.fit(input, output);
+
+            const batchSize = 32;
+            const epochs = 20;
+
+            await this.network.fit(input, output, {
+                batchSize,
+                epochs,
+            });
+            if (first) {
+                const {output} =  await this.doPredict(elem.curState);
+                const str = Array.from(output).map( e => e.toFixed(3) );
+                console.log(`${elem.newState}: ${str}`);
+                first = false;
+            }
         }
     }
 }
