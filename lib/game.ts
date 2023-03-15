@@ -24,7 +24,8 @@ export type State = CellState[]
 
 export type StateHistory = {
     move: CellIndex,
-    state: State
+    curState: State
+    newState: State
 }
 
 type MiniMax = { curScore: number, nextMove: CellIndex[]};
@@ -115,26 +116,34 @@ export class Board
 
     move(index: CellIndex)
     {
-        if (index < 0 || index > 8 || Math.floor(index) != index)
+        if (index < 0 || index > 8 || Math.floor(index) != index) {
             throw new Error(`Index expected to be int in range [0..8]. got: ${index}`);
-        if (this.state_[index] !== CellState.E)
+        }
+
+        if (this.state_[index] !== CellState.E) {
             throw new Error(`Cell ${index} is occupied`);
+        }
 
-        if (this.complete)
+        if (this.complete) {
             return;
+        }
 
+        const curState = this.state_.slice(0);
         this.history_.push(index);
         this.state_[index] = this.player;
-        this.stateHistory_.push( { state: this.state_.slice(0), move: index})
         this.cellsLeft_ --;
+        const newState = this.state_.slice(0);
+        this.stateHistory_.push({ curState, newState, move: index })
+
         this.checkWinner();
     }
 
     undo()
     {
         const index = this.history_.pop();
-        if (index === undefined)
+        if (index === undefined) {
             return;
+        }
 
         this.stateHistory_.pop();
         this.state_[index] = CellState.E;
@@ -145,8 +154,9 @@ export class Board
     public random(): number
     {
         const indexes: number[] = this.state_.reduce((result: number[], currentValue: CellState, currentIndex: number) => {
-            if (currentValue === CellState.E)
+            if (currentValue === CellState.E) {
                 result.push(currentIndex);
+            }
 
             return result;
         }, [] as number[]);

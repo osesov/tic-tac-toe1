@@ -92,22 +92,27 @@ export class Model {
 
         const winner = board.winner;
         const reward = winner === Player.X ? +1.0
-                     : winner === Player.O ? -1.0
-                     : 0.5
+        : winner === Player.O ? -1.0
+        : 0.5
 
         for (const elem of board.stateHistory) {
-            const input = this.stateAsTensor(elem.state);
+            const input = this.stateAsTensor(elem.curState);
             const outputTensor = this.network.predict(input);
-            if (Array.isArray(outputTensor))
+            if (Array.isArray(outputTensor)) {
                 break;
+            }
 
             const outputArray = outputTensor.dataSync();
-            const delta = (1 - outputArray[elem.move]) * reward;
 
-            outputArray[elem.move] += delta;
+            outputArray[elem.move] += reward;
             const output = this.stateAsTensor(outputArray);
+
+            // normalize
+            const max = output.max();
+            const min = output.min();
+            if (max.notEqual(min))
+                output.sub(min).div(max.sub(min));
             await this.network.fit(input, output);
         }
     }
-
 }

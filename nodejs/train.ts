@@ -27,6 +27,8 @@ async function train() {
     const uuid = crypto.randomUUID();
     const backupFile = `${uuid}-backup.model.json`;
     const currentFile = `${uuid}.model.json`;
+    const resetTime = 10000;
+    let startTime = Date.now() + resetTime;
 
     while (true) {
         board.start();
@@ -69,6 +71,14 @@ async function train() {
             fs.renameSync(currentFile, backupFile);
 
         fs.writeFileSync(currentFile, data);
+
+        const now = Date.now();
+        if (now > startTime) {
+            startTime = now + resetTime;
+            x_win = 0;
+            o_win = 0;
+            games = 0;
+        }
     }
 
 }
