@@ -57,6 +57,7 @@ export class Model {
         const json = JSON.parse(str);
         json.weightData = new Uint8Array(Buffer.from(json.weightData, "base64")).buffer;
         const network = await tf.loadLayersModel(tf.io.fromMemory(json));
+        network.summary();
         return new Model(network as tf.Sequential);
     }
 

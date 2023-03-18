@@ -1,8 +1,11 @@
+import dotenv from 'dotenv'
 import typescript from "@rollup/plugin-typescript";
 import resolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
 import serve from 'rollup-plugin-serve';
 import livereload from 'rollup-plugin-livereload';
+
+dotenv.config();
 
 export default {
     input: "browser/browser.ts",
@@ -26,7 +29,30 @@ export default {
         }),
         resolve(),
         commonjs(),
+        ... getServePlugin(),
+    ],
+    watch: {
+        buildDelay: 1000,
+        skipWrite: false,
+        clearScreen: false,
+        // include: [ "lib", "browser" ],
+    },
+};
 
+function toBoolean(value)
+{
+    if (!value)
+        return false;
+
+    return value > 0 || value === "yes" || value === "true";
+}
+
+function getServePlugin()
+{
+    if (!toBoolean(process.env.LIVE_RELOAD))
+        return [];
+
+    return [
         serve({
             open: false,
             verbose: true,
@@ -50,12 +76,5 @@ export default {
             port: 12345,
             delay: 300,
         }),
-
-    ],
-    watch: {
-        buildDelay: 1000,
-        skipWrite: false,
-        clearScreen: false,
-        // include: [ "lib", "browser" ],
-    },
-};
+    ]
+}

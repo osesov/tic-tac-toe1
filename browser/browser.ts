@@ -14,27 +14,18 @@ export async function main()
 {
     console.log(window.tf.version.tfjs);
 
-    const model = new Model(window.tf);
-    console.log(model);
+    const model = await Model.fromJson("f1f368cb-35d1-429b-8e28-92de62153049.model.json");
 
     const board = new Board;
     console.log(board);
-
-    // board.move(0);
-    // board.move(2);
-    // board.move(6);
-    // board.move(8);
-    // board.move(1);
-    // board.move(7);
-    // board.move(4);
-    // board.print()
-    // let p = board.minimax();
 
     while (true) {
         board.start();
 
         while (!board.complete) {
             const xMoves = board.minimax();
+            const possibleMoves = model.predict(board);
+
             const xMove = xMoves[Math.floor(Math.random() * xMoves.length)];
             board.move(xMove);
             board.print();
