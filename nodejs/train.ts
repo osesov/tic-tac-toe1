@@ -3,6 +3,12 @@ import * as fs from "fs";
 import { Board, Player, Winner } from "../lib/game";
 import { Model } from "../lib/model"
 
+import dotenv from "dotenv";
+import { default as parse_duration } from "parse-duration";
+// import  as parse_duration from "parse-duration";
+
+dotenv.config();
+
 interface PlayerState
 {
     next: (board: Board) => Promise<number[]>,
@@ -253,7 +259,7 @@ async function geneticTrain()
     let model = new Model;
 
     const startDate = new Date();
-    const timer = new IntervalTimer(Duration.hours(48), startDate);
+    const timer = new IntervalTimer(parse_duration(process.env['GENETIC_DURATION'] ?? "10m"), startDate);
 
     const file_name = getFileName('genetic', startDate);
     do {
@@ -315,6 +321,11 @@ async function randomTrain() {
 
     await tourneur.playSet(Infinity);
 }
+
+process.on('SIGINT', function() {
+    console.log("CAUGHT INTERRUPT SIGNAL");
+    process.exit();
+});
 
 // await randomTrain();
 await geneticTrain();
