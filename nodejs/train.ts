@@ -11,7 +11,7 @@ interface PlayerState
 
 function pad(n: number, s: string|number)
 {
-    return (Array(n).fill(' ').join('') + s).substr(-n);
+    return (Array(n).fill('0').join('') + s).substr(-n);
 }
 class IntervalTimer
 {
@@ -277,7 +277,7 @@ function getFileName(type: string, date: Date): string
     + '-'
     + `${pad(4, date.getFullYear())}`
     + `${pad(2, date.getMonth())}`
-    + `${pad(2, date.getDay())}`
+    + `${pad(2, date.getDate())}`
     + '-'
     + `${pad(2, date.getHours())}`
     + `${pad(2, date.getMinutes())}`
