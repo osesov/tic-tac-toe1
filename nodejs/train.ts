@@ -225,6 +225,8 @@ async function saveModel(name: string, model: Model)
         fs.renameSync(currentFile, backupFile);
 
     fs.writeFileSync(currentFile, data);
+
+    console.log("Saved as " + currentFile);
 }
 
 function printStat(name: string, stat: TourneurStats, x?: string, o?: string)
@@ -251,7 +253,7 @@ async function geneticTrain()
     let model = new Model;
 
     const startDate = new Date();
-    const timer = new IntervalTimer(Duration.minutes(10), startDate);
+    const timer = new IntervalTimer(Duration.hours(48), startDate);
 
     const file_name = getFileName('genetic', startDate);
     do {
