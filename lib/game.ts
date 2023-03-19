@@ -22,6 +22,8 @@ export type CellState = Player | CellStateEx;
 export type CellIndex = number; // 0|1|2|3|4|5|6|7|8
 export type State = CellState[]
 
+export type Winner = Player | undefined;
+
 export type StateHistory = {
     move: CellIndex,
     curState: State
@@ -38,7 +40,7 @@ function invScore(score: MiniMax): number
 export class Board
 {
     private state_: State = []
-    private winner_: Player | undefined;
+    private winner_: Winner;
     private cellsLeft_ = 0;
     private history_: CellIndex[] = []
     private stateHistory_ : StateHistory[] = []
@@ -68,7 +70,7 @@ export class Board
         return this.cellsLeft_ % 2 === 1 ? Player.X : Player.O
     }
 
-    get winner(): Player | undefined
+    get winner(): Winner
     {
         return this.winner_
     }
@@ -151,7 +153,7 @@ export class Board
         this.winner_ = undefined;
     }
 
-    public random(): number
+    public async random(): Promise<number[]>
     {
         const indexes: number[] = this.state_.reduce((result: number[], currentValue: CellState, currentIndex: number) => {
             if (currentValue === CellState.E) {
@@ -161,13 +163,12 @@ export class Board
             return result;
         }, [] as number[]);
 
-        const index = Math.random() * indexes.length;
-        return indexes[Math.floor(index)];
+        return Promise.resolve(indexes);
     }
 
-    public minimax(): number[]
+    public minimax(): Promise<number[]>
     {
-        return this.minimaxCore().nextMove;
+        return Promise.resolve(this.minimaxCore().nextMove);
     }
 
     private minimaxCore(): MiniMax

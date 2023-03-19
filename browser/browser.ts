@@ -1,4 +1,5 @@
 import tf from "@tensorflow/tfjs";
+import json from "../f1f368cb-35d1-429b-8e28-92de62153049.model.json";
 
 interface Window
 {
@@ -8,33 +9,52 @@ interface Window
 
 declare var window: Window & typeof globalThis;
 import {Model} from '../lib/model';
-import {Board} from '../lib/game';
+import {Board, Player} from '../lib/game';
+import { fstat } from "fs";
 
 export async function main()
 {
-    console.log(window.tf.version.tfjs);
+    console.log(tf.version.tfjs);
 
-    const model = await Model.fromJson("f1f368cb-35d1-429b-8e28-92de62153049.model.json");
-
+    const model = await Model.fromJson(json);
     const board = new Board;
-    console.log(board);
+    let xWinCount = 0;
+    let oWinCount = 0;
+    let drawCount = 0;
+    let gameCount = 0;
 
     while (true) {
         board.start();
+        console.log('####################################');
+
+        const players = {
+            [Player.X]: () => model.predict(board),
+            // [Player.O]: () => board.random(),
+            [Player.O]: () => board.minimax()
+        };
 
         while (!board.complete) {
-            const xMoves = board.minimax();
-            const possibleMoves = model.predict(board);
 
+            const xMoves = await players[board.player]();
             const xMove = xMoves[Math.floor(Math.random() * xMoves.length)];
             board.move(xMove);
             board.print();
-
-            model.predict(board);
         }
 
-        await model.train(board);
+        gameCount++;
+        if (board.winner === Player.X) {
+            xWinCount++;
+        }
+        else if (board.winner === Player.O) {
+            oWinCount++;
+        }
+        else {
+            drawCount++;
+        }
     }
 }
 
-$(main);
+if (global.window)
+    $(main);
+else
+    main();

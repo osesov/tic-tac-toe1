@@ -17,12 +17,21 @@
             "webRoot": "${workspaceFolder}/index"
         },
         {
-            "name": "Launch via npm",
+            "name": "train.ts",
             "type": "node",
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "runtimeExecutable": "npx",
             "runtimeArgs": ["tsx", "nodejs/train.ts"]
-          }
+        },
+        {
+            "name": "browser.ts",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "runtimeExecutable": "npx",
+            "runtimeArgs": ["tsx", "browser/browser.ts"]
+        }
+
     ]
 }

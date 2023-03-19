@@ -5,6 +5,7 @@
   "main": "game.js",
   "scripts": {
     "train": "npx tsx nodejs/train.ts",
+    "play": "npx tsx --tsconfig browser.tsconfig.json browser/browser.ts",
     "serve": "rollup -c browser.rollup.config.js",
     "http": "cd index && http-server-with-headers"
   },
